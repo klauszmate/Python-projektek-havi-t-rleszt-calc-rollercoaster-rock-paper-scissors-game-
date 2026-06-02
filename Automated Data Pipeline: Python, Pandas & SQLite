@@ -1,0 +1,40 @@
+import sqlite3
+import pandas as pd
+
+
+#adatbazis letrehozasa
+kapcsolat = sqlite3.connect("BurgerAdatok.db")
+
+#ADATBAZIS telje_eleresi utja!
+
+teljes_eleresi_ut = r"C:\Users\klaus\Downloads\PYTHON ADATELEMZÉS 1.0 Burger Orders\restaurant_orders.csv"
+
+print(teljes_eleresi_ut)
+
+#CSV BEOLVASASA pandas tablazatba
+adatok = pd.read_csv(teljes_eleresi_ut, encoding="utf-8")
+print(adatok)
+
+#Feltoltes sql adatbazisba indexeles nelkul
+adatok.to_sql("burgeradatok", kapcsolat, if_exists="replace", index=False)
+print("Sikeres feltöltés!")
+
+#SQL Lekerdezes keret (parancsok)
+
+sql_parancs = ("""
+Select [Order ID], [Customer Name], AVG(Price)
+               From burgeradatok
+               where [Order ID] >= 100
+               Group by [Customer Name]
+               Having AVG(Price) > 10;
+               """)
+#Parancs vegrehajtasa
+
+cursor = kapcsolat.cursor()
+cursor.execute(sql_parancs)
+eredmenyek = cursor.fetchall()
+
+print("SQL LEKÉRDEZÉS EREDMÉNYE:\n")
+for sor in eredmenyek:
+    print(sor)
+kapcsolat.close()
